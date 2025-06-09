@@ -1,0 +1,54 @@
+body {
+  background-color: #f1f1f1;
+}
+
+.navbar {
+  padding: 1rem;
+  background-color: #f8f8f8;
+}
+
+.navbar-nav .nav-link {
+  font-size: 1.2rem;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.barraPesquisa {
+  flex-grow: 1;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.barraPesquisa .input-group {
+  width: 100%;
+  max-width: 400px;
+}
+
+.barraPesquisa .form-control {
+  border-radius: 20px !important;
+}
+
+.barraPesquisa .btn {
+  border-radius: 20px !important;
+}
+
+.login-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  color: #28a745;
+  margin-left: 20px;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.login-icon:hover {
+  background-color: #e6e6e6;
+  color: #218838;
+}

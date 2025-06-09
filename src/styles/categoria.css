@@ -1,0 +1,17 @@
+.categoriasContainer {
+  margin: 5px;
+}
+
+.categoriaCard {
+  background-color: gray;
+  border-radius: 5px;
+  height: 25px;
+  max-width: 100px;
+  text-align: center;
+}
+
+.categoriaCard p {
+  color: white;
+  font-weight: bold;
+  font-size: small;
+}
