@@ -1,0 +1,54 @@
+.containerPaginas {
+  width: 90vw; /* ou uma largura fixa como 1000px */
+  margin: 50px auto;
+  padding: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column; /* Se o conteúdo está empilhado verticalmente */
+  justify-content: center; /* Centraliza no eixo vertical */
+  align-items: center; /* Centraliza no eixo horizontal */
+  text-align: center; /* Alinha texto centralizado */
+}
+
+.containerImagem {
+  background-color: #90ee90; /* verde claro */
+  width: 100%;
+  height: 150px; /* altura fixa para manter o espaço mesmo sem imagem */
+  object-fit: cover;
+}
+
+.containerImagem img {
+  width: 100%;
+  height: 100%;
+}
+
+.categoriasContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.categoriaCard {
+  background-color: gray;
+  border-radius: 5px;
+  height: 25px;
+  width: 60px;
+  line-height: 25px; /* Faz o texto "ocupar" toda a altura */
+  text-align: center;
+}
+
+.categoriaCard p {
+  color: white;
+  font-weight: bold;
+  font-size: x-small;
+  padding: 0 10%;
+}
+
+.categoriaCardLink {
+  text-decoration: none; /* Remove sublinhado */
+  color: inherit; /* Herda a cor do texto normalmente */
+  display: block; /* Faz o link ocupar toda a área do card */
+}

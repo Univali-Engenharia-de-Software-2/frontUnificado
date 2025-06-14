@@ -5,8 +5,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // se você usar componentes
 import "@fortawesome/fontawesome-free/css/all.min.css"; // se estiver usando Font Awesome
 
 import "./styles/navbar.css";
-import "./styles/index.css";
-import "./styles/categoria.css";
 
 import App from "./App";
 
