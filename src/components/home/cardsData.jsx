@@ -1,7 +1,7 @@
 const cards = [
   {
     title: "Festa Junina Tradicional",
-    categorias: ["Cultura Popular", "Festa", "Brasil"],
+    categorias: ["Cultura Popular", "Festa", "Brasil", "Cultura Afro-brasileira", "Tradição"],
     image: "https://images.unsplash.com/photo-1623122765373-77be94e5cc94",
     link: "/visualizacao"
   },
