@@ -7,9 +7,11 @@ import CadastroEntidade from "./components/autenticacao/CadastroEntidade";
 import PaginaPrincipal from "./components/home/paginaPrincipal";
 import Editar from "./components/paginas/Editar";
 import Visualizacao from "./components/paginas/Visualizacao";
+import { CategoriaProvider } from "./components/home/categoriaContext";
 
 function App() {
   return (
+    <CategoriaProvider>
     <Router>
       <Navbar />
       <Routes>
@@ -22,6 +24,7 @@ function App() {
         <Route path="/visualizacao" element={<Visualizacao />} />
       </Routes>
     </Router>
+    </CategoriaProvider>
   );
 }
 
