@@ -1,3 +1,9 @@
-Acesso por CodeSandbox.io
+para rodar, no terminal:
 
-https://codesandbox.io/p/github/Univali-Engenharia-de-Software-2/frontUnificado/main
+npm install
+
+npm start
+
+para salvar no GitHub:
+
+não salvar os node.modules
