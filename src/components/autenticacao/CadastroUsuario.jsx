@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import axios from "axios"; // IMPORTAÇÃO DO AXIOS
 import "./styles.css";
 
 export default function CadastroUsuario() {
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     let valid = true;
 
@@ -43,7 +44,25 @@ export default function CadastroUsuario() {
     }
 
     if (valid) {
-      alert("Cadastro de usuário válido!");
+      try {
+        const payload = {
+          nome: nome.value,
+          email: email.value,
+          senha: senha.value,
+          cpf: "00000000000", // Você pode substituir por um campo real se necessário
+          diretorioImagem: "" // ou um link/local temporário
+        };
+
+        const response = await axios.post("http://localhost:5017/api/usuario-visitante/create", payload);
+
+        if (response.status === 200 || response.status === 201) {
+          alert("Usuário cadastrado com sucesso!");
+          // limpar campos ou redirecionar
+        }
+      } catch (error) {
+        console.error("Erro ao cadastrar usuário:", error);
+        alert("Erro ao cadastrar. Verifique os dados ou tente novamente.");
+      }
     }
   };
 
