@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CategoriaContext } from "./home/categoriaContext";
-import cards from "./home/cardsData";
+import axios from "axios";
 
 export default function Navbar() {
   const {
@@ -10,11 +10,25 @@ export default function Navbar() {
     setBusca
   } = useContext(CategoriaContext);
 
-  const navigate = useNavigate(); // 👈 Hook para redirecionar
+  const [categoriasAPI, setCategoriasAPI] = useState([]);
+  const navigate = useNavigate();
 
-  const categoriasUnicas = Array.from(
-    new Set(cards.flatMap(card => card.categorias))
-  );
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await axios.get("http://localhost:5017/api/categoria/get-all");
+
+        // Retirar nomes duplicados:
+        const nomesUnicos = Array.from(new Set(response.data.map(cat => cat.nome)));
+
+        setCategoriasAPI(nomesUnicos);
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error.response?.data || error.message);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const handleSearchChange = (e) => {
     setBusca(e.target.value);
@@ -22,12 +36,14 @@ export default function Navbar() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate("/"); // 👈 Volta para home ao pesquisar
+    setCategoriaSelecionada("Todas"); // Reseta categoria ao buscar
+    navigate("/");
   };
 
   const handleCategoriaClick = (cat) => {
     setCategoriaSelecionada(cat);
-    navigate("/"); // 👈 Volta para home ao clicar em uma categoria
+    setBusca(""); // Limpa busca ao filtrar por categoria
+    navigate("/");
   };
 
   return (
@@ -44,9 +60,7 @@ export default function Navbar() {
         <span className="navbar-toggler-icon"></span>
       </button>
 
-      <Link className="navbar-brand" to="/">
-        Entre Tradições
-      </Link>
+      <Link className="navbar-brand" to="/">Entre Tradições</Link>
 
       <Link className="login-icon mx-2 d-lg-none" to="/login" title="Login">
         <i className="fas fa-user"></i>
@@ -55,9 +69,7 @@ export default function Navbar() {
       <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
           <li className="nav-item active">
-            <Link className="nav-link" to="/saiba-mais">
-              Saiba mais
-            </Link>
+            <Link className="nav-link" to="/saiba-mais">Saiba mais</Link>
           </li>
 
           <li className="nav-item dropdown">
@@ -71,25 +83,22 @@ export default function Navbar() {
             >
               Categorias
             </a>
-            <ul
-              className="dropdown-menu"
-              aria-labelledby="navbarDropdownMenuLink"
-            >
+            <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
               <li>
                 <button
-            className="dropdown-item"
-            onClick={() => handleCategoriaClick("Todas")}
-          >
+                  className="dropdown-item"
+                  onClick={() => handleCategoriaClick("Todas")}
+                >
                   Todas
                 </button>
               </li>
-              {categoriasUnicas.map((cat, index) => (
+              {categoriasAPI.map((catNome, index) => (
                 <li key={index}>
                   <button
-              className="dropdown-item"
-              onClick={() => handleCategoriaClick(cat)}
-            >
-                    {cat}
+                    className="dropdown-item"
+                    onClick={() => handleCategoriaClick(catNome)}
+                  >
+                    {catNome}
                   </button>
                 </li>
               ))}
@@ -98,18 +107,18 @@ export default function Navbar() {
         </ul>
 
         <form className="barraPesquisa d-flex" onSubmit={handleSearchSubmit}>
-        <input
-          className="form-control me-2"
-          type="search"
-          placeholder="O que você procura?"
-          aria-label="Search"
-          value={busca}
-          onChange={handleSearchChange}
-        />
-        <button className="btn btn-outline-success" type="submit">
-          <i className="fas fa-search"></i>
-        </button>
-      </form>
+          <input
+            className="form-control me-2"
+            type="search"
+            placeholder="O que você procura?"
+            aria-label="Search"
+            value={busca}
+            onChange={handleSearchChange}
+          />
+          <button className="btn btn-outline-success" type="submit">
+            <i className="fas fa-search"></i>
+          </button>
+        </form>
 
         <Link className="login-icon ml-3 d-none d-lg-flex" to="/login" title="Login">
           <i className="fas fa-user"></i>

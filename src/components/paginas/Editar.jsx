@@ -1,94 +1,117 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";  // <-- importe aqui
 import "./visualizarEditar.css";
 
 export default function Editar() {
-  useEffect(() => {
-    const savedLogo = localStorage.getItem("logo");
-    if (savedLogo) {
-      document.getElementById("logoPreview").src = savedLogo;
-    }
+  const navigate = useNavigate();  // <-- crie a função de navegação
 
-    const input = document.getElementById("logoInput");
-    input.addEventListener("change", function () {
-      const file = this.files[0];
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById("logoPreview").src = e.target.result;
-      };
-      if (file) reader.readAsDataURL(file);
-    });
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [logo, setLogo] = useState("");
+  const [idUsuarioOng, setIdUsuarioOng] = useState(0);
+
+  useEffect(() => {
+    const carregarDados = async () => {
+      const idCultura = localStorage.getItem("idCulturaSelecionada");
+      if (!idCultura) return;
+
+      try {
+        const response = await axios.get(`http://localhost:5017/api/cultura/${idCultura}`);
+        const cultura = response.data.cultura;
+
+        setTitulo(cultura.nome || "");
+        setDescricao(cultura.descricao || "");
+        setLogo(cultura.diretorioImagem || "");
+        setIdUsuarioOng(cultura.idUsuarioOng || 0);
+
+        const logoPreview = document.getElementById("logoPreview");
+        if (logoPreview) logoPreview.src = cultura.diretorioImagem || "";
+      } catch (error) {
+        console.error("Erro ao carregar cultura:", error);
+      }
+    };
+
+    carregarDados();
   }, []);
 
-  const salvarEdicao = () => {
-    const titulo = document.getElementById("titulo").value;
-    const descricao = document.getElementById("descricao").value;
-    const nomegrupo = document.getElementById("nomegrupo").innerText;
-    const tipogrupo = document.getElementById("tipogrupo").innerText;
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      setLogo(ev.target.result);
+      const logoPreview = document.getElementById("logoPreview");
+      if (logoPreview) logoPreview.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const salvarEdicao = async () => {
+    const idCultura = localStorage.getItem("idCulturaSelecionada");
+    if (!idCultura) {
+      alert("ID da cultura não encontrado!");
+      return;
+    }
 
     if (!titulo.trim() || !descricao.trim()) {
       alert("Preencha todos os campos antes de salvar.");
       return;
     }
 
-    localStorage.setItem("titulo", titulo);
-    localStorage.setItem("descricao", descricao);
-    localStorage.setItem("nomegrupo", nomegrupo);
-    localStorage.setItem("tipogrupo", tipogrupo);
+    try {
+      await axios.put(`http://localhost:5017/api/cultura/update/${idCultura}`, {
+        idUsuarioOng,
+        nome: titulo,
+        descricao,
+        diretorioImagem: logo,
+      });
+      alert("Edição salva com sucesso!");
 
-    const logo = document.getElementById("logoPreview").src;
-    localStorage.setItem("logo", logo);
+      localStorage.setItem("titulo", titulo);
+      localStorage.setItem("descricao", descricao);
+      localStorage.setItem("logo", logo);
 
-    alert("Edição salva com sucesso!");
+      navigate("/visualizacao"); // <-- redireciona após salvar
+    } catch (error) {
+      console.error("Erro ao salvar edição:", error.response?.data || error.message);
+      alert("Erro ao salvar edição.");
+    }
   };
 
   return (
     <div className="container mt-4">
       <div className="content">
-        {" "}
-        {/* Área principal flexível */}
-        <h1>Editar Grupo</h1>
+        <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Editar Grupo</h1>
         <input
           type="text"
           id="titulo"
-          defaultValue="Título"
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
           className="form-control my-2 editable"
+          placeholder="Título"
         />
         <textarea
           id="descricao"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
           className="form-control my-2 editable"
           style={{ resize: "none" }}
-          defaultValue=""
+          placeholder="Descrição"
         ></textarea>
-        <button onClick={salvarEdicao} className="btn btn-primary">
-          Salvar
-        </button>
-      </div>
-
-      <aside className="grupo-sidebar mt-4">
-        {" "}
-        {/* Aside fixo ao lado */}
-        <img
-          id="logoPreview"
-          className="grupo-img"
-          src=""
-          alt="Logo do Grupo"
-        />
         <input
           type="file"
           id="logoInput"
           accept="image/*"
           className="form-control my-2"
+          onChange={handleLogoChange}
         />
-        <h2 contentEditable={true} id="nomegrupo">
-          Grupo
-        </h2>
-        <button className="grupo-btn">EVENTOS</button>
-        <button className="grupo-btn">CONTATO</button>
-        <button className="grupo-btn">FOTOS</button>
-        <div className="grupo-rodape" contentEditable={true} id="tipogrupo">
-          ONG
-        </div>
-      </aside>
+        <img id="logoPreview" className="grupo-img" src={logo} alt="Logo do Grupo" />
+        <button onClick={salvarEdicao} className="btn btn-primary mt-3" style={{ width: "100%" }}>
+          Salvar
+        </button>
+      </div>
     </div>
   );
 }

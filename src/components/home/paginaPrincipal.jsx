@@ -1,29 +1,68 @@
-import React, { useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
 import PageCard from "./pageCard";
-import "./home.css";
 import { CategoriaContext } from "./categoriaContext";
-import cards from "./cardsData";
+import { Link } from "react-router-dom"; // Importante para o botão de navegação
+import "./home.css";
 
-export default function PaginaPrincipal() {
+const PaginaPrincipal = () => {
+  const [culturas, setCulturas] = useState([]);
   const { categoriaSelecionada, busca } = useContext(CategoriaContext);
 
-  const cardsFiltrados = cards.filter((card) => {
-    const pertenceCategoria =
-      categoriaSelecionada === "Todas" || card.categorias.includes(categoriaSelecionada);
+  useEffect(() => {
+    const fetchCulturas = async () => {
+      try {
+        const response = await axios.get("http://localhost:5017/api/cultura/get-all");
+        const culturasComCategorias = await Promise.all(
+          response.data.map(async (cultura) => {
+            const categoriasResponse = await axios.get(
+              `http://localhost:5017/api/cultura-atribuida-categoria/get-all-categorias-by-cultura/${cultura.id}`
+            );
+            return { ...cultura, categorias: categoriasResponse.data.categorias };
+          })
+        );
+        setCulturas(culturasComCategorias);
+      } catch (error) {
+        console.error("Erro ao buscar culturas:", error.response?.data || error.message);
+      }
+    };
 
-    const tituloCorresponde =
-      card.title.toLowerCase().includes(busca.trim().toLowerCase());
+    fetchCulturas();
+  }, []);
 
-    return pertenceCategoria && tituloCorresponde;
+  // Filtragem: por categoria OU por texto digitado na busca
+  const culturasFiltradas = culturas.filter((cultura) => {
+    const tituloCorresponde = cultura.nome.toLowerCase().includes(busca.toLowerCase());
+    const categoriaCorresponde =
+      categoriaSelecionada === "Todas" ||
+      cultura.categorias.includes(categoriaSelecionada);
+
+    return tituloCorresponde && categoriaCorresponde;
   });
 
   return (
     <div className="containerPaginas">
       <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {cardsFiltrados.map((card, index) => (
-          <PageCard key={index} {...card} />
+        {culturasFiltradas.map((cultura) => (
+          <PageCard
+            key={cultura.id}
+            id={cultura.id}
+            title={cultura.nome}
+            image={cultura.diretorioImagem}
+            link={`/visualizacao?id=${cultura.id}`}
+            categorias={cultura.categorias}
+          />
         ))}
+      </div>
+
+      {/* Botão para criar nova cultura */}
+      <div className="text-center mt-4">
+        <Link to="/NovaCultura" className="btn btn-success">
+          Criar Nova Cultura
+        </Link>
       </div>
     </div>
   );
-}
+};
+
+export default PaginaPrincipal;
