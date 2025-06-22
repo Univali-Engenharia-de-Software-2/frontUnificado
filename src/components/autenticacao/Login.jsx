@@ -32,7 +32,7 @@ export default function Login() {
       window.dispatchEvent(new Event("authChange"));
 
       // Redirecionar para home
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error("Erro no login:", error.response?.data || error.message);
       alert("Erro ao fazer login. Verifique suas credenciais.");

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";  // <-- importe aqui
+import { useNavigate } from "react-router-dom";
 import "./visualizarEditar.css";
 
 export default function Editar() {

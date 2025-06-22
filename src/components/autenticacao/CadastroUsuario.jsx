@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./styles.css";
 
-// Função para formatar CPF conforme usuário digita (opcional)
+// Função para formatar CPF conforme o usuário digita
 function formatCpf(value) {
   const onlyNumbers = value.replace(/\D/g, "");
   return onlyNumbers
@@ -19,7 +19,6 @@ export default function CadastroUsuario() {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    telefone: "",
     senha: "",
     cpf: "",
     imagem: null,
@@ -51,11 +50,9 @@ export default function CadastroUsuario() {
     const newErrors = {};
     if (!formData.nome.trim()) newErrors.nome = "Informe o nome.";
     if (!formData.email.includes("@")) newErrors.email = "E-mail inválido.";
-    if (!formData.telefone.trim()) newErrors.telefone = "Informe o telefone.";
     if (formData.senha.length < 6)
       newErrors.senha = "Senha deve ter no mínimo 6 caracteres.";
 
-    // Validar CPF (opcional)
     const cpfLimpo = formData.cpf.replace(/\D/g, "");
     if (cpfLimpo && cpfLimpo.length !== 11) {
       newErrors.cpf = "CPF deve ter 11 dígitos.";
@@ -87,7 +84,7 @@ export default function CadastroUsuario() {
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
-        cpf: cpfLimpo || "00000000000", // CPF limpo ou placeholder
+        cpf: cpfLimpo || "00000000000",
         diretorioImagem: diretorioImagem,
       };
 
@@ -113,7 +110,7 @@ export default function CadastroUsuario() {
           window.dispatchEvent(new Event("authChange"));
 
           alert("Cadastro e login realizados com sucesso!");
-          navigate("/home");
+          navigate("/");
         } else {
           alert("Cadastro feito, mas não foi possível logar automaticamente.");
         }
@@ -122,10 +119,7 @@ export default function CadastroUsuario() {
         alert("Cadastro feito, mas houve erro ao fazer login automático.");
       }
     } catch (error) {
-      console.error(
-        "Erro ao cadastrar usuário visitante:",
-        error.response?.data || error.message
-      );
+      console.error("Erro ao cadastrar usuário visitante:", error.response?.data || error.message);
       alert("Erro ao cadastrar. Verifique os dados e tente novamente.");
     }
   };
@@ -134,7 +128,6 @@ export default function CadastroUsuario() {
     <div className="auth-container">
       <h2>Cadastro de Usuário</h2>
       <form className="auth-form" onSubmit={handleSubmit}>
-
         <div className="form-group">
           <label htmlFor="imagem">Foto (opcional)</label>
           <input
@@ -142,6 +135,7 @@ export default function CadastroUsuario() {
             id="imagem"
             name="imagem"
             accept="image/*"
+            className="form-control"
             onChange={handleFile}
           />
         </div>
@@ -152,6 +146,7 @@ export default function CadastroUsuario() {
             type="text"
             id="nome"
             name="nome"
+            className="form-control"
             value={formData.nome}
             onChange={handleChange}
           />
@@ -164,6 +159,7 @@ export default function CadastroUsuario() {
             type="text"
             id="cpf"
             name="cpf"
+            className="form-control"
             value={formData.cpf}
             maxLength={14}
             placeholder="000.000.000-00"
@@ -178,22 +174,11 @@ export default function CadastroUsuario() {
             type="email"
             id="email"
             name="email"
+            className="form-control"
             value={formData.email}
             onChange={handleChange}
           />
           {errors.email && <small className="text-danger">{errors.email}</small>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="telefone">Telefone</label>
-          <input
-            type="tel"
-            id="telefone"
-            name="telefone"
-            value={formData.telefone}
-            onChange={handleChange}
-          />
-          {errors.telefone && <small className="text-danger">{errors.telefone}</small>}
         </div>
 
         <div className="form-group">
@@ -202,13 +187,14 @@ export default function CadastroUsuario() {
             type="password"
             id="senha"
             name="senha"
+            className="form-control"
             value={formData.senha}
             onChange={handleChange}
           />
           {errors.senha && <small className="text-danger">{errors.senha}</small>}
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary w-100 mt-3">
           Cadastrar
         </button>
       </form>

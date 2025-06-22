@@ -90,8 +90,6 @@ export default function CadastroEntidade() {
 
         diretorioImagem =
           typeof response.data === "string" ? response.data : response.data.caminho;
-
-        console.log("Caminho da imagem recebido:", diretorioImagem);
       }
 
       const usuarioOng = {
@@ -102,7 +100,6 @@ export default function CadastroEntidade() {
         diretorioImagem: diretorioImagem,
       };
 
-      // Cadastro
       await axios.post("http://localhost:5017/api/usuario-ong/create", usuarioOng);
 
       // Login automático após cadastro
@@ -125,7 +122,7 @@ export default function CadastroEntidade() {
           window.dispatchEvent(new Event("authChange"));
 
           alert("Cadastro e login realizados com sucesso!");
-          navigate("/home");
+          navigate("/");
         } else {
           alert("Cadastro feito, mas não foi possível logar automaticamente.");
         }
@@ -134,10 +131,7 @@ export default function CadastroEntidade() {
         alert("Cadastro feito, mas houve erro ao fazer login automático.");
       }
     } catch (error) {
-      console.error(
-        "Erro ao criar usuário ONG:",
-        error.response?.data || error.message
-      );
+      console.error("Erro ao criar usuário ONG:", error.response?.data || error.message);
       alert("Erro ao cadastrar. Verifique os dados e tente novamente.");
     }
   };
@@ -146,56 +140,69 @@ export default function CadastroEntidade() {
     <div className="auth-container">
       <h2>Cadastro de Entidade</h2>
       <form className="auth-form" onSubmit={handleSubmit}>
-        <label htmlFor="imagem">Foto da ONG (opcional)</label>
-        <input
-          id="imagem"
-          type="file"
-          accept="image/*"
-          onChange={handleFile}
-        />
-
-        <label htmlFor="nome">Nome da Entidade</label>
-        <input
-          id="nome"
-          name="nome"
-          value={formData.nome}
-          onChange={handleChange}
-        />
-        {errors.nome && <small className="text-danger">{errors.nome}</small>}
-
-        <label htmlFor="cnpj">CPF ou CNPJ</label>
-        <input
-          id="cnpj"
-          name="cnpj"
-          value={formData.cnpj}
-          placeholder="Digite CPF ou CNPJ"
-          maxLength={18}
-          onChange={handleChange}
-        />
-        {errors.cnpj && <small className="text-danger">{errors.cnpj}</small>}
-
-        <label htmlFor="email">E-mail</label>
-        <input
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        {errors.email && <small className="text-danger">{errors.email}</small>}
-
-        <label htmlFor="senha">Senha</label>
         <div className="form-group">
+          <label htmlFor="imagem">Foto da ONG (opcional)</label>
+          <input
+            id="imagem"
+            type="file"
+            accept="image/*"
+            className="form-control"
+            onChange={handleFile}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="nome">Nome da Entidade</label>
+          <input
+            id="nome"
+            name="nome"
+            value={formData.nome}
+            className="form-control"
+            onChange={handleChange}
+          />
+          {errors.nome && <small className="text-danger">{errors.nome}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="cnpj">CPF ou CNPJ</label>
+          <input
+            id="cnpj"
+            name="cnpj"
+            value={formData.cnpj}
+            className="form-control"
+            placeholder="Digite CPF ou CNPJ"
+            maxLength={18}
+            onChange={handleChange}
+          />
+          {errors.cnpj && <small className="text-danger">{errors.cnpj}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="email">E-mail</label>
+          <input
+            id="email"
+            name="email"
+            value={formData.email}
+            className="form-control"
+            onChange={handleChange}
+          />
+          {errors.email && <small className="text-danger">{errors.email}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="senha">Senha</label>
           <input
             id="senha"
             name="senha"
             type="password"
             value={formData.senha}
+            className="form-control"
             onChange={handleChange}
           />
           {errors.senha && <small className="text-danger">{errors.senha}</small>}
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary w-100 mt-3">
           Cadastrar
         </button>
       </form>
@@ -205,10 +212,7 @@ export default function CadastroEntidade() {
         <Link to="/login" className="btn btn-outline-primary btn-sm mx-1">
           Login
         </Link>
-        <Link
-          to="/cadastro-usuario"
-          className="btn btn-outline-primary btn-sm mx-1"
-        >
+        <Link to="/cadastro-usuario" className="btn btn-outline-primary btn-sm mx-1">
           Cadastrar Usuário
         </Link>
       </div>

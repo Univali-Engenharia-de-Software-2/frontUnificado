@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ContatoPopup from "./ContatoPopup";
 import "./visualizarEditar.css";
 
 export default function Visualizacao() {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     titulo: "Título Padrão",
     descricao: "Descrição padrão.",
@@ -21,6 +22,7 @@ export default function Visualizacao() {
       const idCultura = localStorage.getItem("idCulturaSelecionada");
       const idUsuarioLogado = localStorage.getItem("id");
       const tipoUsuario = localStorage.getItem("tipoUsuario");
+      
 
       if (!idCultura) {
         console.warn("Nenhum ID de cultura encontrado no localStorage.");
@@ -58,6 +60,10 @@ export default function Visualizacao() {
     fetchCultura();
   }, []);
 
+  const irParaCalendario = () => {
+    navigate("/calendario");
+  };
+
   return (
     <div className="container mt-4">
       <div className="contentvisu">
@@ -69,7 +75,7 @@ export default function Visualizacao() {
         <aside className="grupo-sidebar">
           {data.logo && <img className="grupo-img" src={data.logo} alt="Logo do Grupo" />}
           <h2 className="text-center">{data.nomegrupo}</h2>
-          <button className="grupo-btn">EVENTOS</button>
+          <button className="grupo-btn" onClick={irParaCalendario}>EVENTOS</button>
           <button className="grupo-btn" onClick={() => setShowPopup(true)}>CONTATO</button>
           <button className="grupo-btn">FOTOS</button>
           <div className="grupo-rodape">{ongInfo?.nomeOng || "ONG"}</div>
