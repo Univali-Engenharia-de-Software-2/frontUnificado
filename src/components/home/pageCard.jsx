@@ -13,17 +13,31 @@ export default function PageCard({ id, title, image, categorias }) {
 
   return (
     <div 
-      className="col" 
-      onClick={handleClick} 
-      style={{ cursor: "pointer" }}
+      className="col"  
     >
-      <div className="card cardPaginas">
+      <div className="card cardPaginas" onClick={handleClick} style={{ cursor: "pointer" }}>
         <div className="containerImagem">
-          <img 
-            src={image} 
-            className="card-img-top imagem-com-fundo" 
-            alt={title} 
-          />
+          {image ? (
+            <img 
+              src={image} 
+              className="card-img-top imagem-com-fundo" 
+              alt={title} 
+            />
+          ) : (
+            <div 
+              style={{
+                width: "100%",
+                height: "120px",
+                backgroundColor: "#f0f0f0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999"
+              }}
+            >
+              Sem imagem
+            </div>
+          )}
         </div>
         <div className="card-body">
           <h5 className="card-title">{title}</h5>

@@ -132,7 +132,7 @@ export default function Navbar() {
             <i className="fas fa-search"></i>
           </button>
         </form>
-
+      
         {!logado ? (
           <Link className="login-icon ms-3 d-none d-lg-flex" to="/login" title="Login">
             <i className="fas fa-user"></i>

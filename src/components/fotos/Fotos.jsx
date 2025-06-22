@@ -5,6 +5,7 @@ export default function Fotos() {
   const [fotos, setFotos] = useState([]);
   const [novaImagem, setNovaImagem] = useState(null);
   const [mostrarBotaoAdicionar, setMostrarBotaoAdicionar] = useState(false);
+  const [imagemPreview, setImagemPreview] = useState(null);
 
   const idCultura = localStorage.getItem("idCulturaSelecionada");
   const idUsuarioLogado = localStorage.getItem("id");
@@ -14,7 +15,7 @@ export default function Fotos() {
     const fetchFotos = async () => {
       try {
         const response = await axios.get(`http://localhost:5017/api/imagem-cultura/get-all-by-cultura/${idCultura}`);
-        setFotos(response.data.imagens || []); // Ajustado conforme retorno da API
+        setFotos(response.data.imagens || []);
       } catch (error) {
         console.error("Erro ao carregar fotos:", error.response?.data || error.message);
       }
@@ -25,7 +26,11 @@ export default function Fotos() {
         const culturaRes = await axios.get(`http://localhost:5017/api/cultura/${idCultura}`);
         const cultura = culturaRes.data.cultura;
 
-        if (cultura.idUsuarioOng && tipoUsuario === "entidade" && cultura.idUsuarioOng.toString() === idUsuarioLogado) {
+        if (
+          cultura.idUsuarioOng &&
+          tipoUsuario === "entidade" &&
+          cultura.idUsuarioOng.toString() === idUsuarioLogado
+        ) {
           setMostrarBotaoAdicionar(true);
         }
       } catch (error) {
@@ -38,7 +43,9 @@ export default function Fotos() {
   }, [idCultura, idUsuarioLogado, tipoUsuario]);
 
   const handleFileChange = (e) => {
-    setNovaImagem(e.target.files[0]);
+    const file = e.target.files[0];
+    setNovaImagem(file);
+    setImagemPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleUpload = async () => {
@@ -57,17 +64,20 @@ export default function Fotos() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      const diretorioImagem = uploadRes.data?.caminho || uploadRes.data;
+      const diretorioImagem = uploadRes.data?.caminho;
+      if (!diretorioImagem) {
+        throw new Error("Erro: Caminho da imagem não retornado pela API.");
+      }
 
       await axios.post("http://localhost:5017/api/imagem-cultura/create", {
-        diretorioImagem,
+        diretorioImagem: diretorioImagem,
         idCultura: parseInt(idCultura),
       });
 
-      // Atualiza a lista de fotos
       const fotosRes = await axios.get(`http://localhost:5017/api/imagem-cultura/get-all-by-cultura/${idCultura}`);
-      setFotos(fotosRes.data.imagens || []); // Corrigido aqui também
+      setFotos(fotosRes.data.imagens || []);
       setNovaImagem(null);
+      setImagemPreview(null);
       alert("Imagem adicionada com sucesso!");
     } catch (error) {
       console.error("Erro ao fazer upload da imagem:", error.response?.data || error.message);
@@ -76,7 +86,7 @@ export default function Fotos() {
   };
 
   return (
-    <div className="">
+    <div style={{ width: "80vw", margin: "0 auto", padding: "20px" }}>
       <h2 className="text-center mb-4">Galeria de Fotos</h2>
 
       {mostrarBotaoAdicionar && (
@@ -86,28 +96,45 @@ export default function Fotos() {
             accept="image/*"
             onChange={handleFileChange}
             className="form-control mb-2"
-            style={{ maxWidth: "300px", margin: "0 auto" }}
+            style={{ maxWidth: "500px", margin: "0 auto" }}
           />
+          {imagemPreview && (
+            <div className="mb-3">
+              <img
+                src={imagemPreview}
+                alt="Preview"
+                style={{ maxWidth: "300px", maxHeight: "200px", objectFit: "cover" }}
+              />
+            </div>
+          )}
           <button className="btn btn-primary" onClick={handleUpload}>
             Adicionar Nova Foto
           </button>
         </div>
       )}
 
-      <div className="row">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+        gap: "20px",
+      }}>
         {fotos.length === 0 ? (
-          <div className="alert alert-info text-center">Nenhuma foto cadastrada.</div>
+          <div className="alert alert-info text-center" style={{ gridColumn: "1 / -1" }}>
+            Nenhuma foto cadastrada.
+          </div>
         ) : (
           fotos.map((foto, index) => (
-            <div key={index} className="col-md-4 mb-4">
-              <div className="card shadow-sm">
-                <img
-                  src={foto.diretorioImagem}
-                  className="card-img-top"
-                  alt={`Foto ${index + 1}`}
-                  style={{ maxHeight: "250px", objectFit: "cover" }}
-                />
-              </div>
+            <div key={index} style={{
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+            }}>
+              <img
+                src={`http://localhost:5017/${foto.diretorio}`}
+                alt={`Foto ${index + 1}`}
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
             </div>
           ))
         )}
