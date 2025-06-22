@@ -64,6 +64,10 @@ export default function Visualizacao() {
     navigate("/calendario");
   };
 
+  const irParaFotos = () => {
+    navigate("/fotos");
+  };
+
   return (
     <div className="container mt-4">
       <div className="contentvisu">
@@ -77,7 +81,7 @@ export default function Visualizacao() {
           <h2 className="text-center">{data.nomegrupo}</h2>
           <button className="grupo-btn" onClick={irParaCalendario}>EVENTOS</button>
           <button className="grupo-btn" onClick={() => setShowPopup(true)}>CONTATO</button>
-          <button className="grupo-btn">FOTOS</button>
+          <button className="grupo-btn" onClick={irParaFotos}>FOTOS</button>
           <div className="grupo-rodape">{ongInfo?.nomeOng || "ONG"}</div>
         </aside>
 

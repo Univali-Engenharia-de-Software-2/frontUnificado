@@ -10,6 +10,7 @@ import NovaCultura from "./components/paginas/NovaCultura";
 import Visualizacao from "./components/paginas/Visualizacao";
 import { CategoriaProvider } from "./components/home/categoriaContext";
 import Calendario from "./components/calendario/Calendario";
+import Fotos from "./components/fotos/Fotos";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/novaCultura" element={<NovaCultura />} />
           <Route path="/visualizacao" element={<Visualizacao />} />
           <Route path="/calendario" element={<Calendario />} />
+          <Route path="/fotos" element={<Fotos />} />
         </Routes>
       </Router>
     </CategoriaProvider>

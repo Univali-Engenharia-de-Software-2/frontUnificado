@@ -1,0 +1,105 @@
+/* Container geral da página de fotos */
+.fotos-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Título */
+.fotos-titulo {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Área do botão e input de imagem */
+.fotos-upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Input file customizado */
+.fotos-input-file {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.fotos-input-file:hover {
+  border-color: #888;
+}
+
+/* Botão adicionar foto */
+.fotos-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.fotos-btn:hover {
+  background-color: #45a049;
+}
+
+/* Galeria de fotos */
+.fotos-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Card de imagem */
+.fotos-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.fotos-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+/* Imagem dentro do card */
+.fotos-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Mensagem informativa */
+.fotos-no-images {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
+  font-size: 1.1rem;
+}
+
+/* Responsivo para telas menores */
+@media (max-width: 500px) {
+  .fotos-input-file {
+    width: 90%;
+  }
+
+  .fotos-btn {
+    width: 90%;
+  }
+
+  .fotos-card img {
+    height: 180px;
+  }
+}
