@@ -53,3 +53,26 @@ body {
   background-color: #e6e6e6;
   color: #218838;
 }
+
+/* Responsividade para botão de login e dropdown de usuário */
+@media (max-width: 991.98px) {
+  .login-icon,
+  .navbar .dropdown.ms-3 {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .navbar .dropdown-menu {
+    position: static !important;
+    float: none;
+    box-shadow: none;
+    border: 1px solid #ddd;
+    margin-top: 0.5rem;
+  }
+
+  .navbar .dropdown-toggle {
+    width: 100%;
+  }
+}

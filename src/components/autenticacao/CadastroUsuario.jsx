@@ -1,68 +1,132 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import axios from "axios"; // IMPORTAÇÃO DO AXIOS
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./styles.css";
 
+// Função para formatar CPF conforme usuário digita (opcional)
+function formatCpf(value) {
+  const onlyNumbers = value.replace(/\D/g, "");
+  return onlyNumbers
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4")
+    .slice(0, 14);
+}
+
 export default function CadastroUsuario() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    senha: "",
+    cpf: "",
+    imagem: null,
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "cpf") {
+      const formattedCpf = formatCpf(value);
+      setFormData((prev) => ({ ...prev, cpf: formattedCpf }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleFile = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      imagem: e.target.files[0],
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    let valid = true;
 
-    const nome = document.getElementById("nome");
-    const email = document.getElementById("email");
-    const telefone = document.getElementById("telefone");
-    const senha = document.getElementById("senha");
+    const newErrors = {};
+    if (!formData.nome.trim()) newErrors.nome = "Informe o nome.";
+    if (!formData.email.includes("@")) newErrors.email = "E-mail inválido.";
+    if (!formData.telefone.trim()) newErrors.telefone = "Informe o telefone.";
+    if (formData.senha.length < 6)
+      newErrors.senha = "Senha deve ter no mínimo 6 caracteres.";
 
-    const erroNome = document.getElementById("erroNome");
-    const erroEmail = document.getElementById("erroEmail");
-    const erroTelefone = document.getElementById("erroTelefone");
-    const erroSenha = document.getElementById("erroSenha");
-
-    erroNome.textContent = "";
-    erroEmail.textContent = "";
-    erroTelefone.textContent = "";
-    erroSenha.textContent = "";
-
-    if (nome.value.trim() === "") {
-      erroNome.textContent = "Informe o nome.";
-      valid = false;
+    // Validar CPF (opcional)
+    const cpfLimpo = formData.cpf.replace(/\D/g, "");
+    if (cpfLimpo && cpfLimpo.length !== 11) {
+      newErrors.cpf = "CPF deve ter 11 dígitos.";
     }
 
-    if (!email.value.includes("@")) {
-      erroEmail.textContent = "E-mail inválido.";
-      valid = false;
-    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-    if (telefone.value.trim() === "") {
-      erroTelefone.textContent = "Informe o telefone.";
-      valid = false;
-    }
+    try {
+      let diretorioImagem = "";
 
-    if (senha.value.length < 6) {
-      erroSenha.textContent = "Senha deve ter no mínimo 6 caracteres.";
-      valid = false;
-    }
+      if (formData.imagem) {
+        const imagemData = new FormData();
+        imagemData.append("Imagem", formData.imagem);
 
-    if (valid) {
-      try {
-        const payload = {
-          nome: nome.value,
-          email: email.value,
-          senha: senha.value,
-          cpf: "00000000000", // Você pode substituir por um campo real se necessário
-          diretorioImagem: "" // ou um link/local temporário
-        };
+        const response = await axios.post(
+          "http://localhost:5017/api/imagem-perfil/upload-imagem",
+          imagemData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
-        const response = await axios.post("http://localhost:5017/api/usuario-visitante/create", payload);
-
-        if (response.status === 200 || response.status === 201) {
-          alert("Usuário cadastrado com sucesso!");
-          // limpar campos ou redirecionar
-        }
-      } catch (error) {
-        console.error("Erro ao cadastrar usuário:", error);
-        alert("Erro ao cadastrar. Verifique os dados ou tente novamente.");
+        diretorioImagem =
+          typeof response.data === "string" ? response.data : response.data.caminho;
       }
+
+      const payload = {
+        nome: formData.nome,
+        email: formData.email,
+        senha: formData.senha,
+        cpf: cpfLimpo || "00000000000", // CPF limpo ou placeholder
+        diretorioImagem: diretorioImagem,
+      };
+
+      await axios.post("http://localhost:5017/api/usuario-visitante/create", payload);
+
+      // Login automático após cadastro
+      try {
+        const loginRes = await axios.post(
+          "http://localhost:5017/api/usuario-visitante/login",
+          {
+            email: formData.email,
+            senha: formData.senha,
+          }
+        );
+
+        const loginDados = loginRes.data;
+
+        if (loginDados && loginDados.usuario && loginDados.usuario.id) {
+          localStorage.setItem("id", loginDados.usuario.id.toString());
+          localStorage.setItem("tipoUsuario", "visitante");
+          localStorage.setItem("statusLogin", "logado");
+
+          window.dispatchEvent(new Event("authChange"));
+
+          alert("Cadastro e login realizados com sucesso!");
+          navigate("/home");
+        } else {
+          alert("Cadastro feito, mas não foi possível logar automaticamente.");
+        }
+      } catch (loginError) {
+        console.error("Erro ao fazer login automático:", loginError);
+        alert("Cadastro feito, mas houve erro ao fazer login automático.");
+      }
+    } catch (error) {
+      console.error(
+        "Erro ao cadastrar usuário visitante:",
+        error.response?.data || error.message
+      );
+      alert("Erro ao cadastrar. Verifique os dados e tente novamente.");
     }
   };
 
@@ -70,35 +134,87 @@ export default function CadastroUsuario() {
     <div className="auth-container">
       <h2>Cadastro de Usuário</h2>
       <form className="auth-form" onSubmit={handleSubmit}>
+
+        <div className="form-group">
+          <label htmlFor="imagem">Foto (opcional)</label>
+          <input
+            type="file"
+            id="imagem"
+            name="imagem"
+            accept="image/*"
+            onChange={handleFile}
+          />
+        </div>
+
         <div className="form-group">
           <label htmlFor="nome">Nome</label>
-          <input type="text" id="nome" name="nome" />
-          <small id="erroNome" className="text-danger"></small>
+          <input
+            type="text"
+            id="nome"
+            name="nome"
+            value={formData.nome}
+            onChange={handleChange}
+          />
+          {errors.nome && <small className="text-danger">{errors.nome}</small>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="cpf">CPF</label>
+          <input
+            type="text"
+            id="cpf"
+            name="cpf"
+            value={formData.cpf}
+            maxLength={14}
+            placeholder="000.000.000-00"
+            onChange={handleChange}
+          />
+          {errors.cpf && <small className="text-danger">{errors.cpf}</small>}
         </div>
 
         <div className="form-group">
           <label htmlFor="email">E-mail</label>
-          <input type="email" id="email" name="email" />
-          <small id="erroEmail" className="text-danger"></small>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {errors.email && <small className="text-danger">{errors.email}</small>}
         </div>
 
         <div className="form-group">
           <label htmlFor="telefone">Telefone</label>
-          <input type="tel" id="telefone" name="telefone" />
-          <small id="erroTelefone" className="text-danger"></small>
+          <input
+            type="tel"
+            id="telefone"
+            name="telefone"
+            value={formData.telefone}
+            onChange={handleChange}
+          />
+          {errors.telefone && <small className="text-danger">{errors.telefone}</small>}
         </div>
 
         <div className="form-group">
           <label htmlFor="senha">Senha</label>
-          <input type="password" id="senha" name="senha" />
-          <small id="erroSenha" className="text-danger"></small>
+          <input
+            type="password"
+            id="senha"
+            name="senha"
+            value={formData.senha}
+            onChange={handleChange}
+          />
+          {errors.senha && <small className="text-danger">{errors.senha}</small>}
         </div>
 
-        <button type="submit" className="btn btn-primary">Cadastrar</button>
+        <button type="submit" className="btn btn-primary">
+          Cadastrar
+        </button>
       </form>
 
       <div className="text-center mt-4">
-        <p>Não possui uma conta?</p>
+        <p>Já possui uma conta?</p>
         <Link to="/login" className="btn btn-outline-primary btn-sm mx-1">
           Login
         </Link>

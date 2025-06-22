@@ -14,10 +14,13 @@ export default function Visualizacao() {
 
   const [ongInfo, setOngInfo] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [mostrarBotaoEditar, setMostrarBotaoEditar] = useState(false);
 
   useEffect(() => {
     const fetchCultura = async () => {
       const idCultura = localStorage.getItem("idCulturaSelecionada");
+      const idUsuarioLogado = localStorage.getItem("id");
+      const tipoUsuario = localStorage.getItem("tipoUsuario");
 
       if (!idCultura) {
         console.warn("Nenhum ID de cultura encontrado no localStorage.");
@@ -35,10 +38,14 @@ export default function Visualizacao() {
           nomegrupo: cultura.nome,
         });
 
-        // Buscar info da ONG associada
         if (cultura.idUsuarioOng) {
           const ongResponse = await axios.get(`http://localhost:5017/api/usuario-ong/${cultura.idUsuarioOng}`);
           setOngInfo(ongResponse.data.usuario || null);
+
+          // Verifica se é a entidade dona da página
+          if (tipoUsuario === "entidade" && cultura.idUsuarioOng == idUsuarioLogado) {
+            setMostrarBotaoEditar(true);
+          }
         } else {
           setOngInfo(null);
         }
@@ -65,10 +72,12 @@ export default function Visualizacao() {
           <button className="grupo-btn">EVENTOS</button>
           <button className="grupo-btn" onClick={() => setShowPopup(true)}>CONTATO</button>
           <button className="grupo-btn">FOTOS</button>
-          <div className="grupo-rodape">{ongInfo?.nomeOng || "ONG"}</div> {/* nome da ONG ou fallback */}
+          <div className="grupo-rodape">{ongInfo?.nomeOng || "ONG"}</div>
         </aside>
 
-        <Link to="/editar" className="editar-btn-link">EDITAR</Link>
+        {mostrarBotaoEditar && (
+          <Link to="/editar" className="editar-btn-link">EDITAR</Link>
+        )}
       </div>
 
       {showPopup && ongInfo && (

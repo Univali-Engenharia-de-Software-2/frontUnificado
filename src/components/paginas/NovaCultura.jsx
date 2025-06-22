@@ -9,8 +9,8 @@ export default function NovaCultura() {
   const [novaCultura, setNovaCultura] = useState({
     nome: "",
     descricao: "",
-    emailUsuarioOng: "ambiental@ong.com",
-    diretorioImagem: "imagens/cultura_padrao.png",
+    emailUsuarioOng: "",
+    diretorioImagem: "",
   });
 
   const [categoriasDisponiveis, setCategoriasDisponiveis] = useState([]);
@@ -22,12 +22,9 @@ export default function NovaCultura() {
     const fetchCategorias = async () => {
       try {
         const response = await axios.get("http://localhost:5017/api/categoria/get-all");
-
-        // Remove duplicatas pelo nome (case insensitive)
         const categoriasUnicas = Array.from(
           new Map(response.data.map(cat => [cat.nome.toLowerCase(), cat])).values()
         );
-
         setCategoriasDisponiveis(categoriasUnicas);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error.response?.data || error.message);
@@ -37,8 +34,54 @@ export default function NovaCultura() {
     fetchCategorias();
   }, []);
 
+  // Busca email e imagem do usuário ONG com base no ID salvo no localStorage
+  useEffect(() => {
+    const fetchEmailUsuarioOng = async () => {
+      const id = localStorage.getItem("id");
+      if (!id) {
+        console.warn("ID da ONG não encontrado no localStorage.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:5017/api/usuario-ong/${id}`);
+        const usuario = response.data.usuario;
+
+        setNovaCultura(prev => ({
+          ...prev,
+          emailUsuarioOng: usuario.email,
+          diretorioImagem: usuario.diretorioImagem,
+        }));
+
+        const img = document.getElementById("previewImagem");
+        if (img && usuario.diretorioImagem) img.src = usuario.diretorioImagem;
+      } catch (error) {
+        console.error("Erro ao buscar dados da ONG:", error.response?.data || error.message);
+      }
+    };
+
+    fetchEmailUsuarioOng();
+  }, []);
+
   const handleInputChange = (e) => {
     setNovaCultura({ ...novaCultura, [e.target.name]: e.target.value });
+  };
+
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      setNovaCultura(prev => ({
+        ...prev,
+        diretorioImagem: ev.target.result
+      }));
+
+      const preview = document.getElementById("previewImagem");
+      if (preview) preview.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCategoriaToggle = (idCategoria) => {
@@ -72,10 +115,8 @@ export default function NovaCultura() {
     }
 
     try {
-      // Cria categoria na API
       await axios.post("http://localhost:5017/api/categoria/create", { nome: nova });
 
-      // Atualiza lista com novo ID da categoria
       const response = await axios.get("http://localhost:5017/api/categoria/get-all");
       const categoriasUnicas = Array.from(
         new Map(response.data.map(cat => [cat.nome.toLowerCase(), cat])).values()
@@ -98,43 +139,36 @@ export default function NovaCultura() {
           idCategoria
         });
       }
-      console.log("Categorias vinculadas à cultura.");
     } catch (error) {
       console.error("Erro ao vincular categorias:", error.response?.data || error.message);
     }
   };
 
   const criarCultura = async () => {
-  if (!novaCultura.nome || !novaCultura.descricao) {
-    alert("Preencha todos os campos.");
-    return;
-  }
-
-  try {
-    // Cria a cultura
-    await axios.post("http://localhost:5017/api/cultura/create", novaCultura);
-
-    // Buscar a cultura recém-criada pelo nome (único) para pegar o ID
-    const responseGet = await axios.get("http://localhost:5017/api/cultura/get-all");
-    const culturaCriada = responseGet.data.find(
-      cultura => cultura.nome.toLowerCase() === novaCultura.nome.toLowerCase()
-    );
-
-    if (!culturaCriada) {
-      throw new Error("Cultura criada não encontrada.");
+    if (!novaCultura.nome || !novaCultura.descricao) {
+      alert("Preencha todos os campos.");
+      return;
     }
 
-    const idNovaCultura = culturaCriada.id;
+    try {
+      await axios.post("http://localhost:5017/api/cultura/create", novaCultura);
 
-    await vincularCategoriasACultura(idNovaCultura);
+      const responseGet = await axios.get("http://localhost:5017/api/cultura/get-all");
+      const culturaCriada = responseGet.data.find(
+        cultura => cultura.nome.toLowerCase() === novaCultura.nome.toLowerCase()
+      );
 
-    alert("Cultura criada com sucesso!");
-    navigate("/"); // volta à página principal
-  } catch (error) {
-    console.error("Erro ao criar cultura:", error.response?.data || error.message);
-    alert("Erro ao criar cultura.");
-  }
-};
+      if (!culturaCriada) throw new Error("Cultura criada não encontrada.");
+
+      await vincularCategoriasACultura(culturaCriada.id);
+
+      alert("Cultura criada com sucesso!");
+      navigate("/");
+    } catch (error) {
+      console.error("Erro ao criar cultura:", error.response?.data || error.message);
+      alert("Erro ao criar cultura.");
+    }
+  };
 
   return (
     <div className="container mt-4">
@@ -158,7 +192,23 @@ export default function NovaCultura() {
           rows={4}
         />
 
-        <h5>Selecione até 6 Categorias:</h5>
+        <div className="mt-3">
+          <h5>Imagem da Cultura:</h5>
+          <input
+            type="file"
+            accept="image/*"
+            className="form-control my-2"
+            onChange={handleImagemChange}
+          />
+          <img
+            id="previewImagem"
+            src=""
+            alt="Pré-visualização"
+            style={{ width: "100%", maxWidth: "300px", marginTop: "10px" }}
+          />
+        </div>
+
+        <h5 className="mt-4">Selecione até 6 Categorias:</h5>
         <div className="d-flex flex-wrap">
           {categoriasDisponiveis.map((cat) => (
             <button

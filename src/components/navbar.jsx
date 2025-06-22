@@ -11,16 +11,33 @@ export default function Navbar() {
   } = useContext(CategoriaContext);
 
   const [categoriasAPI, setCategoriasAPI] = useState([]);
+  const [logado, setLogado] = useState(false);
+  const [tipoUsuario, setTipoUsuario] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const status = localStorage.getItem("statusLogin") === "logado";
+      const tipo = localStorage.getItem("tipoUsuario");
+      setLogado(status);
+      setTipoUsuario(tipo);
+    };
+
+    checkLoginStatus(); // Verificação inicial
+
+    // Ouvinte para atualização quando login ou logout acontecer
+    window.addEventListener("authChange", checkLoginStatus);
+
+    return () => {
+      window.removeEventListener("authChange", checkLoginStatus);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
         const response = await axios.get("http://localhost:5017/api/categoria/get-all");
-
-        // Retirar nomes duplicados:
         const nomesUnicos = Array.from(new Set(response.data.map(cat => cat.nome)));
-
         setCategoriasAPI(nomesUnicos);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error.response?.data || error.message);
@@ -36,13 +53,19 @@ export default function Navbar() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setCategoriaSelecionada("Todas"); // Reseta categoria ao buscar
+    setCategoriaSelecionada("Todas");
     navigate("/");
   };
 
   const handleCategoriaClick = (cat) => {
     setCategoriaSelecionada(cat);
-    setBusca(""); // Limpa busca ao filtrar por categoria
+    setBusca("");
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.dispatchEvent(new Event("authChange"));
     navigate("/");
   };
 
@@ -61,10 +84,6 @@ export default function Navbar() {
       </button>
 
       <Link className="navbar-brand" to="/">Entre Tradições</Link>
-
-      <Link className="login-icon mx-2 d-lg-none" to="/login" title="Login">
-        <i className="fas fa-user"></i>
-      </Link>
 
       <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
@@ -85,19 +104,13 @@ export default function Navbar() {
             </a>
             <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
               <li>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleCategoriaClick("Todas")}
-                >
+                <button className="dropdown-item" onClick={() => handleCategoriaClick("Todas")}>
                   Todas
                 </button>
               </li>
               {categoriasAPI.map((catNome, index) => (
                 <li key={index}>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => handleCategoriaClick(catNome)}
-                  >
+                  <button className="dropdown-item" onClick={() => handleCategoriaClick(catNome)}>
                     {catNome}
                   </button>
                 </li>
@@ -120,9 +133,43 @@ export default function Navbar() {
           </button>
         </form>
 
-        <Link className="login-icon ml-3 d-none d-lg-flex" to="/login" title="Login">
-          <i className="fas fa-user"></i>
-        </Link>
+        {!logado ? (
+          <Link className="login-icon ms-3 d-none d-lg-flex" to="/login" title="Login">
+            <i className="fas fa-user"></i>
+          </Link>
+        ) : (
+          <div className="dropdown ms-3">
+            <button
+              className="btn btn-outline-secondary dropdown-toggle"
+              type="button"
+              id="userDropdown"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i className="fas fa-user"></i>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li>
+                <Link className="dropdown-item" to="/editar-usuario">
+                  Editar Perfil
+                </Link>
+              </li>
+              {tipoUsuario === "entidade" && (
+                <li>
+                  <Link className="dropdown-item" to="/NovaCultura">
+                    Criar Página
+                  </Link>
+                </li>
+              )}
+              <li><hr className="dropdown-divider" /></li>
+              <li>
+                <button className="dropdown-item text-danger" onClick={handleLogout}>
+                  Sair
+                </button>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </nav>
   );

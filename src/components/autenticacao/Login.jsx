@@ -20,14 +20,18 @@ export default function Login() {
 
     try {
       const response = await axios.post(url, { email, senha });
-
       const dados = response.data;
+
       alert("Login realizado com sucesso!");
 
-      // Salva dados do usuário, se necessário
-      // localStorage.setItem("usuario", JSON.stringify(dados));
+      // Salvar o ID que está dentro de "usuario"
+      localStorage.setItem("id", dados.usuario.id.toString());
+      localStorage.setItem("tipoUsuario", tipoUsuario);
+      localStorage.setItem("statusLogin", "logado");
 
-      // Redireciona
+      window.dispatchEvent(new Event("authChange"));
+
+      // Redirecionar para home
       navigate("/home");
     } catch (error) {
       console.error("Erro no login:", error.response?.data || error.message);

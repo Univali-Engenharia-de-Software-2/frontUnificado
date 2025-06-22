@@ -54,13 +54,6 @@ const PaginaPrincipal = () => {
           />
         ))}
       </div>
-
-      {/* Botão para criar nova cultura */}
-      <div className="text-center mt-4">
-        <Link to="/NovaCultura" className="btn btn-success">
-          Criar Nova Cultura
-        </Link>
-      </div>
     </div>
   );
 };

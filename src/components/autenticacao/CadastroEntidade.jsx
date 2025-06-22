@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./styles.css";
 
@@ -8,14 +8,12 @@ function formatCpfCnpj(value) {
   const onlyNumbers = value.replace(/\D/g, "");
 
   if (onlyNumbers.length <= 11) {
-    // Formatar CPF: 000.000.000-00
     return onlyNumbers
       .replace(/^(\d{3})(\d)/, "$1.$2")
       .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
       .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4")
       .slice(0, 14);
   } else {
-    // Formatar CNPJ: 00.000.000/0000-00
     return onlyNumbers
       .replace(/^(\d{2})(\d)/, "$1.$2")
       .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
@@ -30,26 +28,21 @@ export default function CadastroEntidade() {
     nome: "",
     email: "",
     senha: "",
-    cnpj: "",  // pode conter CPF ou CNPJ formatado
+    cnpj: "",
     imagem: null,
   });
 
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "cnpj") {
       const formatted = formatCpfCnpj(value);
-      setFormData((prev) => ({
-        ...prev,
-        cnpj: formatted,
-      }));
+      setFormData((prev) => ({ ...prev, cnpj: formatted }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -70,7 +63,6 @@ export default function CadastroEntidade() {
       newErrors.senha = "Senha deve ter no mínimo 6 caracteres.";
 
     const cnpjCpfLimpo = formData.cnpj.replace(/\D/g, "");
-
     const cpfRegex = /^\d{11}$/;
     const cnpjRegex = /^\d{14}$/;
 
@@ -110,13 +102,37 @@ export default function CadastroEntidade() {
         diretorioImagem: diretorioImagem,
       };
 
-      const res = await axios.post(
-        "http://localhost:5017/api/usuario-ong/create",
-        usuarioOng
-      );
+      // Cadastro
+      await axios.post("http://localhost:5017/api/usuario-ong/create", usuarioOng);
 
-      alert("Cadastro realizado com sucesso!");
-      console.log("Usuário ONG criado:", res.data);
+      // Login automático após cadastro
+      try {
+        const loginRes = await axios.post(
+          "http://localhost:5017/api/usuario-ong/login",
+          {
+            email: formData.email,
+            senha: formData.senha,
+          }
+        );
+
+        const loginDados = loginRes.data;
+
+        if (loginDados && loginDados.usuario && loginDados.usuario.id) {
+          localStorage.setItem("id", loginDados.usuario.id.toString());
+          localStorage.setItem("tipoUsuario", "entidade");
+          localStorage.setItem("statusLogin", "logado");
+
+          window.dispatchEvent(new Event("authChange"));
+
+          alert("Cadastro e login realizados com sucesso!");
+          navigate("/home");
+        } else {
+          alert("Cadastro feito, mas não foi possível logar automaticamente.");
+        }
+      } catch (loginError) {
+        console.error("Erro ao fazer login automático:", loginError);
+        alert("Cadastro feito, mas houve erro ao fazer login automático.");
+      }
     } catch (error) {
       console.error(
         "Erro ao criar usuário ONG:",
@@ -166,25 +182,26 @@ export default function CadastroEntidade() {
           onChange={handleChange}
         />
         {errors.email && <small className="text-danger">{errors.email}</small>}
-        
+
         <label htmlFor="senha">Senha</label>
         <div className="form-group">
-        <input 
-          id="senha"
-          name="senha"
-          type="password"
-          value={formData.senha}
-          onChange={handleChange}
-        />
-        {errors.senha && <small className="text-danger">{errors.senha}</small>}
+          <input
+            id="senha"
+            name="senha"
+            type="password"
+            value={formData.senha}
+            onChange={handleChange}
+          />
+          {errors.senha && <small className="text-danger">{errors.senha}</small>}
         </div>
-        <button type="submit" className="btn btn-primary" >
+
+        <button type="submit" className="btn btn-primary">
           Cadastrar
         </button>
       </form>
 
       <div className="text-center mt-4">
-        <p>Não possui uma conta?</p>
+        <p>Já possui uma conta?</p>
         <Link to="/login" className="btn btn-outline-primary btn-sm mx-1">
           Login
         </Link>
