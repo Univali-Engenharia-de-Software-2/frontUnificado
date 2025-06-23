@@ -1,0 +1,60 @@
+.pagina-alterar-conta form {
+  max-width: 600px;
+  margin: 120px auto 40px;
+  padding: 40px 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pagina-alterar-conta h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 24px;
+}
+
+.pagina-alterar-conta label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.pagina-alterar-conta input[type="text"],
+.pagina-alterar-conta input[type="email"],
+.pagina-alterar-conta input[type="tel"],
+.pagina-alterar-conta input[type="password"],
+.pagina-alterar-conta input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.pagina-alterar-conta input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.pagina-alterar-conta button[type="submit"] {
+  margin-top: 30px;
+  width: 100%;
+  padding: 14px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagina-alterar-conta button[type="submit"]:hover {
+  background-color: #0056b3;
+}

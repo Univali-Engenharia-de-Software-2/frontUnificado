@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CategoriaContext } from "./home/categoriaContext";
+import { CategoriaContext } from "./home/categoriaContext"; // ajuste se necessário
 import axios from "axios";
+import logo from "../logo/Logo.png"; // ✅ Importando a logo
 
 export default function Navbar() {
   const {
@@ -23,14 +24,9 @@ export default function Navbar() {
       setTipoUsuario(tipo);
     };
 
-    checkLoginStatus(); // Verificação inicial
-
-    // Ouvinte para atualização quando login ou logout acontecer
+    checkLoginStatus();
     window.addEventListener("authChange", checkLoginStatus);
-
-    return () => {
-      window.removeEventListener("authChange", checkLoginStatus);
-    };
+    return () => window.removeEventListener("authChange", checkLoginStatus);
   }, []);
 
   useEffect(() => {
@@ -83,7 +79,15 @@ export default function Navbar() {
         <span className="navbar-toggler-icon"></span>
       </button>
 
-      <Link className="navbar-brand" to="/">Entre Tradições</Link>
+      {/* Logo + Nome */}
+      <Link className="navbar-brand d-flex align-items-center" to="/">
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ height: "70px", marginRight: "10px" }}
+        />
+        Entre Tradições
+      </Link>
 
       <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
@@ -132,7 +136,7 @@ export default function Navbar() {
             <i className="fas fa-search"></i>
           </button>
         </form>
-      
+
         {!logado ? (
           <Link className="login-icon ms-3 d-none d-lg-flex" to="/login" title="Login">
             <i className="fas fa-user"></i>
@@ -150,9 +154,18 @@ export default function Navbar() {
             </button>
             <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li>
-                <Link className="dropdown-item" to="/editar-usuario">
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    if (tipoUsuario === "entidade") {
+                      navigate("/atcontaentidade");
+                    } else {
+                      navigate("/atcontavisitante");
+                    }
+                  }}
+                >
                   Editar Perfil
-                </Link>
+                </button>
               </li>
               {tipoUsuario === "entidade" && (
                 <li>

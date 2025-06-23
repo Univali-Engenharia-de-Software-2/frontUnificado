@@ -8,9 +8,11 @@ import PaginaPrincipal from "./components/home/paginaPrincipal";
 import Editar from "./components/paginas/Editar";
 import NovaCultura from "./components/paginas/NovaCultura";
 import Visualizacao from "./components/paginas/Visualizacao";
-import { CategoriaProvider } from "./components/home/categoriaContext";
+import AlterarContaEntidade from "./components/autenticacao/AlterarContaEntidade";
+import AlterarContaVisitante from "./components/autenticacao/AlterarContaVisitante";
 import Calendario from "./components/calendario/Calendario";
 import Fotos from "./components/fotos/Fotos";
+import { CategoriaProvider } from "./components/home/categoriaContext";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/editar" element={<Editar />} />
           <Route path="/novaCultura" element={<NovaCultura />} />
           <Route path="/visualizacao" element={<Visualizacao />} />
+          <Route path="/atcontaentidade" element={<AlterarContaEntidade />} />
+          <Route path="/atcontavisitante" element={<AlterarContaVisitante />} />
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/fotos" element={<Fotos />} />
         </Routes>
