@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./visualizarEditar.css";
 
 export default function Editar() {
-  const navigate = useNavigate();  // <-- crie a função de navegação
+  const navigate = useNavigate();
 
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -73,10 +73,31 @@ export default function Editar() {
       localStorage.setItem("descricao", descricao);
       localStorage.setItem("logo", logo);
 
-      navigate("/visualizacao"); // <-- redireciona após salvar
+      navigate("/visualizacao");
     } catch (error) {
       console.error("Erro ao salvar edição:", error.response?.data || error.message);
       alert("Erro ao salvar edição.");
+    }
+  };
+
+  const excluirCultura = async () => {
+    const idCultura = localStorage.getItem("idCulturaSelecionada");
+    if (!idCultura) {
+      alert("ID da cultura não encontrado!");
+      return;
+    }
+
+    const confirmacao = window.confirm("Tem certeza que deseja excluir esta cultura?");
+    if (!confirmacao) return;
+
+    try {
+      await axios.delete(`http://localhost:5017/api/cultura/delete/${idCultura}`);
+      alert("Cultura excluída com sucesso!");
+      localStorage.removeItem("idCulturaSelecionada");
+      navigate("/"); // ou para alguma rota de listagem
+    } catch (error) {
+      console.error("Erro ao excluir cultura:", error.response?.data || error.message);
+      alert("Erro ao excluir cultura.");
     }
   };
 
@@ -107,9 +128,17 @@ export default function Editar() {
           className="form-control my-2"
           onChange={handleLogoChange}
         />
-        <img id="logoPreview" className="grupo-img" src={logo} alt="Logo do Grupo" />
+        <img id="logoPreview" className="grupo-img-edit" src={logo} alt="Logo do Grupo" />
         <button onClick={salvarEdicao} className="btn btn-primary mt-3" style={{ width: "100%" }}>
           Salvar
+        </button>
+
+        <button
+          onClick={excluirCultura}
+          className="btn btn-danger mt-3"
+          style={{ width: "100%" }}
+        >
+          Excluir Cultura
         </button>
       </div>
     </div>
